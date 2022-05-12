@@ -1,17 +1,18 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:highlight_text/highlight_text.dart';
+import 'package:random_string/random_string.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 void main() {
-  runApp(MyApp());
+  runApp(habibi());
 }
 
-class MyApp extends StatelessWidget {
+class habibi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Voice',
+      title: 'ALPHABET',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.red,
@@ -69,6 +70,7 @@ class _SpeechScreenState extends State<SpeechScreen> {
   late stt.SpeechToText _speech;
   bool _isListening = false;
   String _text = 'Press the button and start speaking';
+  String _randomText = randomAlpha(1).toUpperCase();
   double _confidence = 1.0;
 
   @override
@@ -100,14 +102,23 @@ class _SpeechScreenState extends State<SpeechScreen> {
         reverse: true,
         child: Container(
           padding: const EdgeInsets.fromLTRB(30.0, 30.0, 30.0, 150.0),
-          child: TextHighlight(
-            text: _text,
-            words: _highlights,
-            textStyle: const TextStyle(
-              fontSize: 32.0,
-              color: Colors.black,
-              fontWeight: FontWeight.w400,
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                _randomText,
+                style: TextStyle(fontSize: 250),
+              ),
+              TextHighlight(
+                text: _text,
+                words: _highlights,
+                textStyle: const TextStyle(
+                  fontSize: 32.0,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -127,6 +138,11 @@ class _SpeechScreenState extends State<SpeechScreen> {
             _text = val.recognizedWords;
             if (val.hasConfidenceRating && val.confidence > 0) {
               _confidence = val.confidence;
+            }
+            if (_text == _randomText) {
+              _text = _text + " Jawaban Benar";
+            } else {
+              _text = _text + " Jawaban Salah";
             }
           }),
         );
