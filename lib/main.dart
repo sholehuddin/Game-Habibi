@@ -135,14 +135,14 @@ class _SpeechScreenState extends State<SpeechScreen> {
         setState(() => _isListening = true);
         _speech.listen(
           onResult: (val) => setState(() {
-            _text = val.recognizedWords;
+            _text = val.recognizedWords.toUpperCase();
             if (val.hasConfidenceRating && val.confidence > 0) {
               _confidence = val.confidence;
-            }
-            if (_text == _randomText) {
-              _text = _text + " Jawaban Benar";
-            } else {
-              _text = _text + " Jawaban Salah";
+              if (_text == _randomText) {
+                _text = _text + " Jawaban Benar";
+              } else {
+                _text = _text + " Jawaban Salah";
+              }
             }
           }),
         );
@@ -150,6 +150,8 @@ class _SpeechScreenState extends State<SpeechScreen> {
     } else {
       setState(() => _isListening = false);
       _speech.stop();
+      _text = " ";
+      _randomText = randomAlpha(1).toUpperCase();
     }
   }
 }
