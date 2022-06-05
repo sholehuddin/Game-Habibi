@@ -15,10 +15,14 @@ class PlayScreen extends StatefulWidget {
 
 class _PlayScreenState extends State<PlayScreen> {
   late stt.SpeechToText _speech;
+  late Timer _timer;
   bool _isListening = false;
-  String _text = 'Mendengarkan...';
-  String _randomText = randomAlpha(1).toUpperCase();
+  String _text = '';
+  String _randomText = '';
   double _confidence = 1.0;
+  int _countQuestion = 0;
+  int _trueAnswer = 0;
+  String _startButton = 'Mulai';
 
   @override
   void initState() {
@@ -54,6 +58,8 @@ class _PlayScreenState extends State<PlayScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Text("Soal : " + _countQuestion.toString()),
+                    Text("Jawaban Benar : " + _trueAnswer.toString()),
                     Consumer<TimeState>(
                         builder: (context, timeState, _) => CustomProgressBar(
                               width: 200,
@@ -72,39 +78,88 @@ class _PlayScreenState extends State<PlayScreen> {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Consumer<TimeState>(
+                        builder: (context, timeState, _) =>
+                            FloatingActionButton(
+                                onPressed: !_isListening
+                                    ? () {
+                                        timeState.time = 10;
+                                        _listen(timeState);
+                                      }
+                                    : null,
+                                child: Text(_startButton)))
+                    //child: Icon(_isListening ? Icons.mic : Icons.mic_none)))
                   ],
                 ),
               ))),
     );
   }
 
-  void _listen() async {
-    if (!_isListening) {
-      bool available = await _speech.initialize(
-        onStatus: (val) => print('onStatus: $val'),
-        onError: (val) => print('onError: $val'),
-      );
-      if (available) {
-        setState(() => _isListening = true);
-        _speech.listen(
-          onResult: (val) => setState(() {
-            _text = val.recognizedWords.toUpperCase();
-            if (val.hasConfidenceRating && val.confidence > 0) {
-              _confidence = val.confidence;
-              if (_text == _randomText) {
-                _text = _text + " Jawaban Benar";
-              } else {
-                _text = _text + " Jawaban Salah";
-              }
-            }
-          }),
-        );
-      }
+  void _listen(TimeState timeState) async {
+    if (_startButton == "Skor") {
+      setState(() {
+        _randomText = _trueAnswer.toString();
+        _text = "Skor Anda";
+        _startButton = 'Mulai';
+        _trueAnswer = 0;
+        _countQuestion = 0;
+      });
     } else {
-      setState(() => _isListening = false);
-      _speech.stop();
-      _text = " ";
-      _randomText = randomAlpha(1).toUpperCase();
+      if (!_isListening) {
+        bool available = await _speech.initialize(
+          onStatus: (val) => print('onStatus: $val'),
+          onError: (val) => print('onError: $val'),
+          finalTimeout: const Duration(seconds: 100),
+        );
+        if (available) {
+          _countQuestion++;
+          if (_countQuestion == 10) _startButton = "Skor";
+          setState(() => _isListening = true);
+          _randomText = randomAlpha(1).toUpperCase();
+          _text = 'Mendengarkan...';
+          _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+            if (timeState.time == 0) {
+              timer.cancel();
+              setState(() {
+                _text = 'Berhenti...';
+                setState(() => _isListening = false);
+                _speech.stop();
+              });
+            } else {
+              timeState.time -= 1;
+            }
+          });
+
+          _speech.listen(
+            onResult: (val) => setState(() {
+              _text = val.recognizedWords.toUpperCase();
+              if (val.hasConfidenceRating && val.confidence > 0) {
+                _confidence = val.confidence;
+                if (_text == _randomText) {
+                  _timer.cancel();
+                  _text = _text + " Jawaban Benar";
+                  _trueAnswer++;
+                  setState(() => _isListening = false);
+                  _speech.stop();
+                } else {
+                  _text = _text + " Jawaban Salah";
+                  _timer.cancel();
+                  setState(() => _isListening = false);
+                  _speech.stop();
+                }
+              }
+            }),
+          );
+        }
+      } else {
+        setState(() => _isListening = false);
+        _speech.stop();
+        _text = " ";
+        //_randomText = randomAlpha(1).toUpperCase();
+      }
     }
   }
 }
