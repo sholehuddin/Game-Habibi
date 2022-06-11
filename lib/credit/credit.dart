@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_navigation/src/routes/default_transitions.dart';
 
 class credit extends StatelessWidget {
   @override
@@ -12,11 +13,15 @@ class credit extends StatelessWidget {
           SafeArea(
               child: Column(
             children: [
-              const SizedBox(
+              SizedBox(
                 height: 15,
               ),
-              Text(
-                  "Ahmad Aulia Rahman Habibi (181021400179) Mahasiswa Program Studi Teknik Informatika UNPAM")
+              Center(
+                child: Text(
+                  "Nama : Ahmad Aulia Rahman Habibi",
+                  textAlign: TextAlign.left,
+                ),
+              )
             ],
           ))
         ],

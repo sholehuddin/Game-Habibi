@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:game_alphabet/about/about.dart';
 import 'package:game_alphabet/constants.dart';
 import 'package:game_alphabet/credit/credit.dart';
@@ -10,22 +11,24 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 9, 3, 95),
       body: Stack(
         children: [
+          SvgPicture.asset("assets/bg.svg", width: 450, fit: BoxFit.fill),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: kDefaultPadding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Spacer(flex: 2), //2/6
-                  Text(
-                    "       GAME ALFABET",
+                  Spacer(flex: 2),
+                  Center(
+                      child: Text(
+                    "GAME ALFABET",
                     style: Theme.of(context).textTheme.headline4?.copyWith(
                         color: Color.fromARGB(255, 250, 247, 247),
                         fontWeight: FontWeight.bold),
-                  ),
+                    textAlign: TextAlign.center,
+                  )), //2/6
                   Spacer(), // 1/6
                   InkWell(
                     onTap: () => Get.to(PlayScreen()),

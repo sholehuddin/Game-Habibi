@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:highlight_text/highlight_text.dart';
 import 'package:provider/provider.dart';
 import 'package:random_string/random_string.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import '../score/score.dart';
 
 class PlayScreen extends StatefulWidget {
   @override
@@ -34,7 +36,7 @@ class _PlayScreenState extends State<PlayScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Confidence: ${(_confidence * 100.0).toStringAsFixed(1)}%'),
+        title: Text('Ketepatan : ${(_confidence * 100.0).toStringAsFixed(1)}%'),
       ),
       // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       // floatingActionButton: AvatarGlow(
@@ -100,13 +102,19 @@ class _PlayScreenState extends State<PlayScreen> {
 
   void _listen(TimeState timeState) async {
     if (_startButton == "Skor") {
-      setState(() {
-        _randomText = _trueAnswer.toString();
-        _text = "Skor Anda";
-        _startButton = 'Mulai';
-        _trueAnswer = 0;
-        _countQuestion = 0;
-      });
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                ScoreScreen(trueAnswer: (_trueAnswer * 10).toString())),
+      );
+      // setState(() {
+      //   _randomText = _trueAnswer.toString();
+      //   _text = "Skor Anda";
+      //   _startButton = 'Mulai';
+      //   _trueAnswer = 0;
+      //   _countQuestion = 0;
+      // });
     } else {
       if (!_isListening) {
         bool available = await _speech.initialize(
@@ -116,6 +124,7 @@ class _PlayScreenState extends State<PlayScreen> {
         );
         if (available) {
           _countQuestion++;
+          _startButton = "Lanjut";
           if (_countQuestion == 10) _startButton = "Skor";
           setState(() => _isListening = true);
           _randomText = randomAlpha(1).toUpperCase();
