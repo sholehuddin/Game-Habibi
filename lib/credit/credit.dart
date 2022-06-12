@@ -16,12 +16,11 @@ class credit extends StatelessWidget {
               SizedBox(
                 height: 15,
               ),
-              Center(
-                child: Text(
-                  "Nama : Ahmad Aulia Rahman Habibi",
-                  textAlign: TextAlign.left,
-                ),
-              )
+              Text(
+                "Ahmad Aulia Rahman Habibi                                        " +
+                    "181021400179                                                                              " +
+                    "Program Studi Teknik Informatika Universitas Pamulang",
+              ),
             ],
           ))
         ],
