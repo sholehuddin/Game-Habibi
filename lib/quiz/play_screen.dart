@@ -37,7 +37,8 @@ class _PlayScreenState extends State<PlayScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ketepatan : ${(_confidence * 100.0).toStringAsFixed(1)}%'),
+        title: Text('Soal : ${(_countQuestion).toString()}'),
+        // title: Text('Ketepatan : ${(_confidence * 100.0).toStringAsFixed(1)}%'),
       ),
       // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       // floatingActionButton: AvatarGlow(
@@ -61,11 +62,11 @@ class _PlayScreenState extends State<PlayScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Soal : " + _countQuestion.toString()),
+                    // Text("Soal : " + _countQuestion.toString()),
                     // Text("Jawaban Benar : " + _trueAnswer.toString()),
                     Consumer<TimeState>(
                         builder: (context, timeState, _) => CustomProgressBar(
-                              width: 200,
+                              width: 250,
                               value: timeState.time,
                               totalvalue: durasi,
                             )),
@@ -115,6 +116,7 @@ class _PlayScreenState extends State<PlayScreen> {
     } else if (_startButton == "Mulai" || _startButton == "Lanjut") {
       _text = ' ';
       _countQuestion++;
+      _text = 'Tekan untuk menjawab';
       _startButton = "Jawab";
       setState(() => _randomText = randomAlpha(1).toUpperCase());
       if (_countQuestion == 10) _startButton = "Skor";
