@@ -37,8 +37,7 @@ class _PlayScreenState extends State<PlayScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Soal : ${(_countQuestion).toString()}'),
-        // title: Text('Ketepatan : ${(_confidence * 100.0).toStringAsFixed(1)}%'),
+        title: Text('Akurasi : ${(_confidence * 100.0).toStringAsFixed(1)}%'),
       ),
       // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       // floatingActionButton: AvatarGlow(
@@ -116,16 +115,14 @@ class _PlayScreenState extends State<PlayScreen> {
     } else if (_startButton == "Mulai" || _startButton == "Lanjut") {
       _text = ' ';
       _countQuestion++;
-      _text = 'Tekan untuk menjawab';
       _startButton = "Jawab";
       setState(() => _randomText = randomAlpha(1).toUpperCase());
-      if (_countQuestion == 10) _startButton = "Skor";
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (timeState.time == 0) {
           timer.cancel();
           setState(() {
             _text = 'Waktu Habis';
-            _startButton = (_countQuestion == 10) ? "Skor" : "Lanjut";
+            _startButton = (_countQuestion >= 10) ? "Skor" : "Lanjut";
             setState(() => _isListening = false);
             _speech.stop();
           });
@@ -156,13 +153,13 @@ class _PlayScreenState extends State<PlayScreen> {
               _text = _text + " Jawaban Benar";
               _trueAnswer++;
               setState(() => _isListening = false);
-              _startButton = (_countQuestion == 10) ? "Skor" : "Lanjut";
+              _startButton = (_countQuestion >= 10) ? "Skor" : "Lanjut";
               _speech.stop();
             } else {
               _text = _text + " Jawaban Salah";
               _timer.cancel();
               setState(() => _isListening = false);
-              _startButton = (_countQuestion == 10) ? "Skor" : "Lanjut";
+              _startButton = (_countQuestion >= 10) ? "Skor" : "Lanjut";
               _speech.stop();
             }
           }
