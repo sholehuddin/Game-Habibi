@@ -25,6 +25,7 @@ class _PlayScreenState extends State<PlayScreen> {
   int _countQuestion = 0;
   int _trueAnswer = 0;
   String _startButton = 'Mulai';
+  int durasi = 15;
 
   @override
   void initState() {
@@ -61,12 +62,12 @@ class _PlayScreenState extends State<PlayScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text("Soal : " + _countQuestion.toString()),
-                    Text("Jawaban Benar : " + _trueAnswer.toString()),
+                    // Text("Jawaban Benar : " + _trueAnswer.toString()),
                     Consumer<TimeState>(
                         builder: (context, timeState, _) => CustomProgressBar(
                               width: 200,
                               value: timeState.time,
-                              totalvalue: 10,
+                              totalvalue: durasi,
                             )),
                     Text(
                       _randomText,
@@ -88,8 +89,10 @@ class _PlayScreenState extends State<PlayScreen> {
                             FloatingActionButton(
                                 onPressed: !_isListening
                                     ? () {
-                                        timeState.time = 10;
-                                        _listen(timeState);
+                                        if (_startButton == "Mulai" ||
+                                            _startButton == "Lanjut")
+                                          timeState.time = durasi;
+                                        _soal(timeState);
                                       }
                                     : null,
                                 child: Text(_startButton)))
@@ -100,75 +103,76 @@ class _PlayScreenState extends State<PlayScreen> {
     );
   }
 
-  void _listen(TimeState timeState) async {
+  void _soal(TimeState timeState) async {
     if (_startButton == "Skor") {
       Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                ScoreScreen(trueAnswer: (_trueAnswer * 10).toString())),
-      );
-      // setState(() {
-      //   _randomText = _trueAnswer.toString();
-      //   _text = "Skor Anda";
-      //   _startButton = 'Mulai';
-      //   _trueAnswer = 0;
-      //   _countQuestion = 0;
-      // });
-    } else {
-      if (!_isListening) {
-        bool available = await _speech.initialize(
-          onStatus: (val) => print('onStatus: $val'),
-          onError: (val) => print('onError: $val'),
-          finalTimeout: const Duration(seconds: 100),
-        );
-        if (available) {
-          _countQuestion++;
-          _startButton = "Lanjut";
-          if (_countQuestion == 10) _startButton = "Skor";
-          setState(() => _isListening = true);
-          _randomText = randomAlpha(1).toUpperCase();
-          _text = 'Mendengarkan...';
-          _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-            if (timeState.time == 0) {
-              timer.cancel();
-              setState(() {
-                _text = 'Berhenti...';
-                setState(() => _isListening = false);
-                _speech.stop();
-              });
-            } else {
-              timeState.time -= 1;
-            }
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  ScoreScreen(trueAnswer: (_trueAnswer * 10).toString())));
+    } else if (_startButton == "Jawab") {
+      _listen(timeState);
+    } else if (_startButton == "Mulai" || _startButton == "Lanjut") {
+      _text = ' ';
+      _countQuestion++;
+      _startButton = "Jawab";
+      setState(() => _randomText = randomAlpha(1).toUpperCase());
+      if (_countQuestion == 10) _startButton = "Skor";
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (timeState.time == 0) {
+          timer.cancel();
+          setState(() {
+            _text = 'Waktu Habis';
+            _startButton = (_countQuestion == 10) ? "Skor" : "Lanjut";
+            setState(() => _isListening = false);
+            _speech.stop();
           });
-
-          _speech.listen(
-            onResult: (val) => setState(() {
-              _text = val.recognizedWords.toUpperCase();
-              if (val.hasConfidenceRating && val.confidence > 0) {
-                _confidence = val.confidence;
-                if (_text == _randomText) {
-                  _timer.cancel();
-                  _text = _text + " Jawaban Benar";
-                  _trueAnswer++;
-                  setState(() => _isListening = false);
-                  _speech.stop();
-                } else {
-                  _text = _text + " Jawaban Salah";
-                  _timer.cancel();
-                  setState(() => _isListening = false);
-                  _speech.stop();
-                }
-              }
-            }),
-          );
+        } else {
+          timeState.time -= 1;
         }
-      } else {
-        setState(() => _isListening = false);
-        _speech.stop();
-        _text = " ";
-        //_randomText = randomAlpha(1).toUpperCase();
+      });
+    }
+  }
+
+  void _listen(TimeState timeState) async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('onStatus: $val'),
+        onError: (val) => print('onError: $val'),
+        finalTimeout: const Duration(seconds: 100),
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _text = 'Mendengarkan...';
+        _speech.listen(
+          onResult: (val) => setState(() {
+            _text = val.recognizedWords.toUpperCase();
+            // if (val.hasConfidenceRating && val.confidence > 0) {
+            _confidence = val.confidence;
+            if (_text == _randomText) {
+              _timer.cancel();
+              _text = _text + " Jawaban Benar";
+              _trueAnswer++;
+              setState(() => _isListening = false);
+              _startButton = (_countQuestion == 10) ? "Skor" : "Lanjut";
+              _speech.stop();
+            } else {
+              _text = _text + " Jawaban Salah";
+              _timer.cancel();
+              setState(() => _isListening = false);
+              _startButton = (_countQuestion == 10) ? "Skor" : "Lanjut";
+              _speech.stop();
+            }
+          }
+              // }
+              ),
+        );
       }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+      _text = " ";
+      //_randomText = randomAlpha(1).toUpperCase();
     }
   }
 }
@@ -228,7 +232,7 @@ class CustomProgressBar extends StatelessWidget {
 }
 
 class TimeState with ChangeNotifier {
-  int _time = 10;
+  int _time = 15;
 
   int get time => _time;
   set time(int newTime) {
