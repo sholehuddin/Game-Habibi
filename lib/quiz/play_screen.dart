@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/cupertino.dart';
@@ -146,25 +147,33 @@ class _PlayScreenState extends State<PlayScreen> {
         _speech.listen(
           onResult: (val) => setState(() {
             _text = val.recognizedWords.toUpperCase();
-            // if (val.hasConfidenceRating && val.confidence > 0) {
-            _confidence = val.confidence;
-            if (_text == _randomText) {
-              _timer.cancel();
-              _text = _text + " Jawaban Benar";
-              _trueAnswer++;
-              setState(() => _isListening = false);
-              _startButton = (_countQuestion >= 10) ? "Skor" : "Lanjut";
-              _speech.stop();
+            if (val.hasConfidenceRating && val.confidence > 0) {
+              _confidence = val.confidence;
+              Similarity(words: _text).similarity().then((value) => {
+                    if (value == _randomText)
+                      {
+                        _timer.cancel(),
+                        _text = value + " Jawaban Benar",
+                        _trueAnswer++,
+                        setState(() => _isListening = false),
+                        _startButton =
+                            (_countQuestion >= 10) ? "Skor" : "Lanjut",
+                        _speech.stop()
+                      }
+                    else
+                      {
+                        _text = value + " Jawaban Salah",
+                        _timer.cancel(),
+                        setState(() => _isListening = false),
+                        _startButton =
+                            (_countQuestion >= 10) ? "Skor" : "Lanjut",
+                        _speech.stop()
+                      }
+                  });
             } else {
-              _text = _text + " Jawaban Salah";
-              _timer.cancel();
-              setState(() => _isListening = false);
-              _startButton = (_countQuestion >= 10) ? "Skor" : "Lanjut";
-              _speech.stop();
+              _text = "Memeriksa Jawaban";
             }
-          }
-              // }
-              ),
+          }),
         );
       }
     } else {
@@ -237,5 +246,53 @@ class TimeState with ChangeNotifier {
   set time(int newTime) {
     _time = newTime;
     notifyListeners();
+  }
+}
+
+class Similarity {
+  Similarity({required this.words});
+  final String words;
+
+  Future<String> similarity() async {
+    String wordsSims = "";
+    switch (words) {
+      case "ES":
+        wordsSims = "S";
+        break;
+      case "KAK":
+        wordsSims = "K";
+        break;
+      case "HAK":
+        wordsSims = "H";
+        break;
+      case "HAH":
+        wordsSims = "H";
+        break;
+      case "KI":
+        wordsSims = "Q";
+        break;
+      case "DEK":
+        wordsSims = "D";
+        break;
+      case "IH":
+        wordsSims = "I";
+        break;
+      case "OH":
+        wordsSims = "O";
+        break;
+      case "UH":
+        wordsSims = "U";
+        break;
+      case "WEI":
+        wordsSims = "W";
+        break;
+      case "WOI":
+        wordsSims = "W";
+        break;
+      default:
+        wordsSims = words;
+        break;
+    }
+    return wordsSims;
   }
 }
