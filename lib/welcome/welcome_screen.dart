@@ -5,6 +5,7 @@ import 'package:game_alphabet/about/about.dart';
 import 'package:game_alphabet/constants.dart';
 import 'package:game_alphabet/credit/credit.dart';
 import 'package:game_alphabet/quiz/play_screen.dart';
+import 'package:game_alphabet/quiz/play_screen_kata.dart';
 import 'package:get/get.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -41,7 +42,29 @@ class WelcomeScreen extends StatelessWidget {
                         borderRadius: BorderRadius.all(Radius.circular(12)),
                       ),
                       child: Text(
-                        "MAIN",
+                        "MAIN HURUF",
+                        style: Theme.of(context)
+                            .textTheme
+                            .button
+                            ?.copyWith(color: Colors.black),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  InkWell(
+                    onTap: () => Get.to(PlayScreen_kata()),
+                    child: Container(
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.all(kDefaultPadding * 0.75), // 15
+                      decoration: BoxDecoration(
+                        gradient: kPrimaryGradient,
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
+                      child: Text(
+                        "MAIN KATA",
                         style: Theme.of(context)
                             .textTheme
                             .button
